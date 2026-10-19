@@ -1,9 +1,11 @@
-ultralytics
-opencv-python
-deep-sort-realtime
-numpy
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch
 torchvision
+ultralytics
+opencv-python-headless
+deep-sort-realtime
+numpy
 fastapi
 uvicorn
 python-multipart
+

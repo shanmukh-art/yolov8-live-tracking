@@ -10,20 +10,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy dependency requirements
-COPY requirements.txt .
+# Upgrade pip
+RUN pip install --no-cache-dir --upgrade pip
 
-# Install Python packages
+# Pre-install CPU-only PyTorch to prevent downloading 2.5GB+ CUDA wheels on Render
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# Copy and install python dependencies
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-download YOLOv8 Nano weights during build so container starts instantly
+# Copy local YOLOv8 nano model weights if present and verify/download
+COPY yolov8n.pt* ./
 RUN python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')"
 
 # Copy backend application
 COPY backend/ ./backend/
 
 ENV PORT=10000
+ENV PYTHONUNBUFFERED=1
 EXPOSE 10000
 
 # Run uvicorn dynamically binding to $PORT provided by Render
-CMD ["sh", "-c", "uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-10000}"]
+CMD ["sh", "-c", "exec uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-10000}"]
+
