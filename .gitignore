@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Frontend dependencies and builds
+frontend/node_modules/
+node_modules/
+frontend/dist/
+dist/
+
+# Large user uploads (>100MB exceeds GitHub limit)
+uploads/*
+!uploads/.gitkeep
+
+# Model weights (Ultralytics auto-downloads weights on-demand)
+# Comment out if you prefer committing small weights
+*.pt
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.agents/
