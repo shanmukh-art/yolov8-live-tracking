@@ -128,35 +128,40 @@ const App = () => {
     let ws: WebSocket;
     
     const connectTelemetry = () => {
-      ws = new WebSocket(getWsUrl('/ws'));
-      
-      ws.onopen = () => {
-        console.log("Telemetry WebSocket connected.");
-        setSystemConnected(true);
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const telemetryData = JSON.parse(event.data);
-          setStats(telemetryData);
-          setHistoricalCounts(prev => {
-            const next = [...prev.slice(1), telemetryData.count];
-            return next;
-          });
-        } catch (e) {
-          console.error("Error parsing telemetry WebSocket data:", e);
-        }
-      };
-      
-      ws.onclose = () => {
-        console.log("Telemetry WebSocket disconnected. Reconnecting...");
-        setTimeout(connectTelemetry, 3000);
-      };
-      
-      ws.onerror = (err) => {
-        console.error("Telemetry WebSocket error:", err);
-        ws.close();
-      };
+      try {
+        ws = new WebSocket(getWsUrl('/ws'));
+        
+        ws.onopen = () => {
+          console.log("Telemetry WebSocket connected.");
+          setSystemConnected(true);
+        };
+        
+        ws.onmessage = (event) => {
+          try {
+            const telemetryData = JSON.parse(event.data);
+            setStats(telemetryData);
+            setHistoricalCounts(prev => {
+              const next = [...prev.slice(1), telemetryData.count];
+              return next;
+            });
+          } catch (e) {
+            console.error("Error parsing telemetry WebSocket data:", e);
+          }
+        };
+        
+        ws.onclose = () => {
+          console.log("Telemetry WebSocket disconnected. Reconnecting...");
+          setTimeout(connectTelemetry, 3000);
+        };
+        
+        ws.onerror = (err) => {
+          console.error("Telemetry WebSocket error:", err);
+          try { ws?.close(); } catch {}
+        };
+      } catch (err) {
+        console.error("Failed to initialize WebSocket:", err);
+        setSystemConnected(false);
+      }
     };
     
     connectTelemetry();
