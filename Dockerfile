@@ -16,12 +16,14 @@ COPY requirements.txt .
 # Install Python packages
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend application, weights and assets
+# Pre-download YOLOv8 Nano weights during build so container starts instantly
+RUN python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')"
+
+# Copy backend application
 COPY backend/ ./backend/
-COPY yolov8n.pt yolov8s.pt yolov8m.pt ./
-COPY frontend/dist/ ./frontend/dist/
 
-ENV PORT=8000
-EXPOSE 8000
+ENV PORT=10000
+EXPOSE 10000
 
-CMD ["uvicorn", "backend.server:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run uvicorn dynamically binding to $PORT provided by Render
+CMD ["sh", "-c", "uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-10000}"]

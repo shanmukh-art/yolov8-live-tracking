@@ -717,6 +717,10 @@ from fastapi.responses import FileResponse
 if os.path.exists(DIST_DIR):
     app.mount("/assets", StaticFiles(directory=os.path.join(DIST_DIR, "assets")), name="static_assets")
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "service": "yolov8-live-tracking-backend"}
+
 @app.get("/{catchall:path}")
 async def serve_react(catchall: str):
     file_path = os.path.join(DIST_DIR, catchall)
@@ -725,8 +729,9 @@ async def serve_react(catchall: str):
     index_path = os.path.join(DIST_DIR, "index.html")
     if os.path.isfile(index_path):
         return FileResponse(index_path)
-    return {"message": "Frontend build files not found. Please build the frontend."}
+    return {"status": "active", "message": "YOLOv8 Backend Running. Connect from frontend dashboard."}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
